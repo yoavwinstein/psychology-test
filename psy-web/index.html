@@ -176,6 +176,12 @@
             showElem("test_description_2", false);
             showElem("test_description_3", false);
             showElem("test_description_" + currentLevel, true);
+            var elem = document.getElementById("test_button_begin_level");
+            if (testMode) {
+                elem.innerText = "התחל שלב ניסיוני";
+            } else {
+                elem.innerText = "התחל שלב";
+            }
         }
 
         function onBeginTest() {
@@ -268,9 +274,6 @@
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
-                    // data was uploaded successfully
-                    // var json = JSON.parse(xhr.responseText);
-                    // console.log(json.email + ", " + json.password);
                     console.log("Upload successful");
                 }
             };
@@ -312,7 +315,7 @@
             <h2 id="test_description_1">אתה בשלב 1</h2>
             <h2 id="test_description_2">אתה בשלב 2</h2>
             <h2 id="test_description_3">אתה בשלב 3</h2>
-            <button onclick="onBeginLevel()">התחל שלב</button>
+            <button onclick="onBeginLevel()" id="test_button_begin_level">התחל שלב</button>
         </div>
 
         <div id="test_done" style="display: none">
