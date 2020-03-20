@@ -1,2 +1,2 @@
 # psychology-test
-A test developed by me for my brother's first degree psychology thesis
+A cognitive load task about auditory and visual modalities developed by me for my brother's first degree psychology seminar paper
