@@ -11,6 +11,7 @@ let router = express.Router()
 let port = process.env.PORT || 3232;
 
 router.use('/', express.static('.'));
+router.use('/audio', express.static('/audio'));
 
 app.post('/post', bodyParser.json(), function(req, res) {
     console.log(req.body);

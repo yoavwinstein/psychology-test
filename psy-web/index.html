@@ -55,6 +55,11 @@
             setTimeout(function () {
                 performStage3();
             }, 500);
+
+            // For now playing 100ms beforehand
+            setTimeout(function () {
+                playSound(randomLetterEnglish());
+            }, 400);
         }
 
         function replaceAtIndex(str, index, replacement) {
@@ -63,6 +68,12 @@
 
         function randomLetter() {
             var firstLetter = "א".charCodeAt(0);
+            var idx = Math.floor(Math.random() * 4);
+            return String.fromCharCode(firstLetter + idx);
+        }
+
+        function randomLetterEnglish() {
+            var firstLetter = "a".charCodeAt(0);
             var idx = Math.floor(Math.random() * 4);
             return String.fromCharCode(firstLetter + idx);
         }
@@ -171,7 +182,7 @@
         }
 
         function onKeyDown(event) {
-            if (currentStage == 3 || currentStage == 4) {
+            if (currentStage == 4) {
                 if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
                     if (!userFirstArrow) {
                         userFirstArrowTime = performance.now();
@@ -223,7 +234,7 @@
             <br />
             <h1>+</h1>
         </div>
-
+        
         <!-- phase2 is pitch black, so just hiding both -->
 
         <div id="test_phase3" style="display: none">
@@ -239,6 +250,13 @@
             </table>
         </div>
 
+        <div id="test_description">
+            <h1>טקסט הוראות על בחינה</h1>
+            <h2 id="test_description_1">אתה בשלב 1</h2>
+            <h2 id="test_description_2">אתה בשלב 2</h2>
+            <h2 id="test_description_3">אתה בשלב 3</h2>
+        </div>
+
         <div id="test_done" style="display: none">
             <h1>המבחן נגמר. תודה!</h1>
         </div>
@@ -249,11 +267,20 @@
     </div>
 
     <audio hidden="hidden" id="play_success">
-        <source src="success.mp3" />
+        <source src="audio/success.mp3" />
     </audio>
 
-    <audio hidden="hidden" id="play_failure">
-        <source src="failure.mp3" />
+    <audio hidden="hidden" id="play_a">
+        <source src="audio/a.mp3" />
+    </audio>
+    <audio hidden="hidden" id="play_b">
+        <source src="audio/b.mp3" />
+    </audio>
+    <audio hidden="hidden" id="play_c">
+        <source src="audio/c.mp3" />
+    </audio>
+    <audio hidden="hidden" id="play_d">
+        <source src="audio/d.mp3" />
     </audio>
 </body>
 </html>
