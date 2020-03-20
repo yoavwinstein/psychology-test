@@ -1,0 +1,259 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <title>מבחן מגניב</title>
+
+    <script>
+        var numberOfIterations = 0;
+        var currentStage = 0;
+        var expectedArrow = null;
+        var userFirstArrow = undefined;
+        var userFirstArrowTime = undefined;
+        var stage4BeginTime;
+        var userData = []
+
+        function playSound(soundName) {
+            var elem = document.getElementById("play_" + soundName);
+            elem.play();
+        }
+
+        function showElem(elemName, shouldShow) {
+            var elem = document.getElementById(elemName);
+            elem.style.display = shouldShow ? "inherit" : "none";
+        }
+
+        function beginCountdown() {
+            var i = 3;
+            var interval = setInterval(function () {
+
+                var countdownText = document.getElementById("test_phase0");
+                i--;
+                countdownText.innerText = "המבחן יתחיל בעוד " + i + " שניות";
+
+                if (i == 0) {
+                    clearInterval(interval);
+                    performStage1();
+                }
+            }, 1000);
+        }
+
+        function performStage1() {
+            currentStage = 1;
+            showElem("test_phase0", false);
+            showElem("test_phase1", true);
+            setTimeout(function () {
+                performStage2();
+            }, 500);
+        }
+
+        function performStage2() {
+            currentStage = 2;
+            showElem("test_phase1", false);
+            setTimeout(function () {
+                performStage3();
+            }, 500);
+        }
+
+        function replaceAtIndex(str, index, replacement) {
+            return str.substr(0, index) + replacement + str.substr(index + replacement.length);
+        }
+
+        function randomLetter() {
+            var firstLetter = "א".charCodeAt(0);
+            var idx = Math.floor(Math.random() * 4);
+            return String.fromCharCode(firstLetter + idx);
+        }
+
+        function generateStage3Text() {
+
+            var index = Math.floor(Math.random() * 6);
+
+            for (var i = 0; i < 6; ++i) {
+                var elem = document.getElementById("idx_" + i);
+                elem.innerText = ".";
+                if (i === index) {
+                    var letter = randomLetter();
+                    if (letter === "א" || letter === "ב") {
+                        expectedArrow = "ArrowRight";
+                    } else if (letter === "ג" || letter === "ד") {
+                        expectedArrow = "ArrowLeft";
+                    }
+                    elem.innerText = randomLetter();
+                }
+            }
+        }
+
+        function performStage3() {
+            userFirstArrow = undefined;
+            userFirstArrowTime = undefined;
+            currentStage = 3;
+            generateStage3Text();
+            showElem("test_phase3", true);
+            setTimeout(function () {
+                performStage4();
+            }, 120);
+        }
+
+        function collectDataFromStage3() {
+            var delayMS = null;
+            if (userFirstArrowTime) {
+                delayMS = userFirstArrowTime - stage4BeginTime;
+            }
+
+            selectedArrow = userFirstArrow ? userFirstArrow : null
+
+            userData.push({
+                delayMS: delayMS,
+                expectedArrow: expectedArrow,
+                selectedArrow: selectedArrow
+            });
+        }
+
+        function performStage4() {
+            currentStage = 4;
+
+            stage4BeginTime = performance.now();
+
+            showElem("test_phase3", false);
+            setTimeout(function () {
+                numberOfIterations++;
+                collectDataFromStage3();
+                if (numberOfIterations < 3) {
+                    performStage1();
+                } else {
+                    endTest();
+                }
+            }, 500);
+        }
+
+        function endTest() {
+            showElem("test_done", true);
+            console.log(userData);
+            uploadTestData();
+            closeFullscreen();
+        }
+
+        function onBeginTest() {
+            openFullscreen();
+        
+            showElem("test", true);
+            showElem("begintestbutton", false);
+
+            beginCountdown();
+        }
+
+        var docElem = document.documentElement;
+        function openFullscreen() {
+            if (docElem.requestFullscreen) {
+                docElem.requestFullscreen();
+            } else if (docElem.mozRequestFullScreen) { /* Firefox */
+                docElem.mozRequestFullScreen();
+            } else if (docElem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                docElem.webkitRequestFullscreen();
+            } else if (docElem.msRequestFullscreen) { /* IE/Edge */
+                docElem.msRequestFullscreen();
+            }
+        }
+
+        function closeFullscreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) { /* Firefox */
+                document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { /* IE/Edge */
+                document.msExitFullscreen();
+            }
+        }
+
+        function onKeyDown(event) {
+            if (currentStage == 3 || currentStage == 4) {
+                if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+                    if (!userFirstArrow) {
+                        userFirstArrowTime = performance.now();
+                        userFirstArrow = event.key;
+                    }
+                }
+            }
+        }
+
+        function uploadTestData() {
+            var xhr = new XMLHttpRequest();
+            var url = "http://localhost:3232/post";
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // data was uploaded successfully
+                    // var json = JSON.parse(xhr.responseText);
+                    // console.log(json.email + ", " + json.password);
+                    console.log("Upload successful");
+                }
+            };
+            var data = JSON.stringify(userData);
+            xhr.send(data);
+        }
+
+    </script>
+
+</head>
+<body style="background-color: black;
+    color: white;
+    text-align: center;
+    direction: rtl;
+    font-family: Arial;
+    height: 800px;
+    font-size: 42px;"
+      id="body"
+      onkeydown="onKeyDown(event)">
+
+    <div id="test" style="display: none;
+    vertical-align: middle;">
+        <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br />
+
+        <div id="test_phase0">
+            המבחן יתחיל בעוד 10 שניות
+        </div>
+
+        <div id="test_phase1" style="display: none">
+            <br />
+            <h1>+</h1>
+        </div>
+
+        <!-- phase2 is pitch black, so just hiding both -->
+
+        <div id="test_phase3" style="display: none">
+            <table cellpadding="50" align="center" style="text-align: center">
+                <tr>
+                    <td><h1 id="idx_0"></h1></td>
+                    <td><h1 id="idx_1"></h1></td>
+                    <td><h1 id="idx_2"></h1></td>
+                    <td><h1 id="idx_3"></h1></td>
+                    <td><h1 id="idx_4"></h1></td>
+                    <td><h1 id="idx_5"></h1></td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="test_done" style="display: none">
+            <h1>המבחן נגמר. תודה!</h1>
+        </div>
+    </div>
+
+    <div id="begintestbutton">
+        <button onclick="onBeginTest()">התחל מבחן</button>
+    </div>
+
+    <audio hidden="hidden" id="play_success">
+        <source src="success.mp3" />
+    </audio>
+
+    <audio hidden="hidden" id="play_failure">
+        <source src="failure.mp3" />
+    </audio>
+</body>
+</html>
