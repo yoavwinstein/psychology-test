@@ -1,8 +1,8 @@
 'use strict';
 const express = require('express');
-const handler = require('serve-handler');
 const { convertArrayToCSV } = require('convert-array-to-csv');
 const bodyParser = require('body-parser');
+const expressip = require('express-ip');
 const fs = require('fs');
 
 
@@ -10,17 +10,23 @@ let app = express();
 let router = express.Router()
 let port = process.env.PORT || 3232;
 
+app.use(expressip().getIpInfoMiddleware);
 router.use('/', express.static('.'));
 router.use('/audio', express.static('/audio'));
 
-app.post('/post', bodyParser.json(), function(req, res) {
+function replaceAll(str, toFind, toReplace) {
+    return str.split(toFind).join(toReplace)
+}
+
+app.post('/post', bodyParser.json(), function (req, res) {
+
     console.log(req.body);
     let csv = convertArrayToCSV(req.body, {
-        header: ['delayMS', 'expectedArrow', 'selectedArrow']
+        header: ['delay in milliseconds', 'expected arrow', 'selected arrow', 'condition', 'is test']
     });
     console.log(csv);
-
-    fs.writeFileSync('test_results/test_result.csv', csv);
+    
+    fs.writeFileSync('test_results/' + replaceAll(req.ipInfo.ip, ':', '_') + 'test_result.csv', csv);
 });
 
 module.exports = router;

@@ -1,0 +1,9 @@
+body {
+    background-color: black;
+    color: white;
+    text-align: center;
+    direction: rtl;
+    font-family: Arial;
+    height: 800px;
+    font-size: 42px;
+}

@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, user-scalable=no" />
     <title>מבחן מגניב</title>
 
+    <link rel="stylesheet" type="text/css" href="style.css" />
+
     <script>
         var numberOfIterations = 0;
         var currentStage = 0;
@@ -13,7 +15,16 @@
         var userFirstArrow = undefined;
         var userFirstArrowTime = undefined;
         var stage4BeginTime;
+        var levelOrder = [1, 2, 3];
+        var currentLevel = 0;
         var userData = []
+        var testMode = true;
+
+        function shuffle(array) {
+            array.sort(() => Math.random() - 0.5);
+        }
+
+        shuffle(levelOrder);
 
         function playSound(soundName) {
             var elem = document.getElementById("play_" + soundName);
@@ -25,24 +36,9 @@
             elem.style.display = shouldShow ? "inherit" : "none";
         }
 
-        function beginCountdown() {
-            var i = 3;
-            var interval = setInterval(function () {
-
-                var countdownText = document.getElementById("test_phase0");
-                i--;
-                countdownText.innerText = "המבחן יתחיל בעוד " + i + " שניות";
-
-                if (i == 0) {
-                    clearInterval(interval);
-                    performStage1();
-                }
-            }, 1000);
-        }
-
         function performStage1() {
             currentStage = 1;
-            showElem("test_phase0", false);
+            showElem("test_description", false);
             showElem("test_phase1", true);
             setTimeout(function () {
                 performStage2();
@@ -72,6 +68,23 @@
             return String.fromCharCode(firstLetter + idx);
         }
 
+        function randomFromList(items) {
+            return items[Math.floor(Math.random() * items.length)];
+        }
+
+        function randomCorrectHebrewLetter() {
+            var letters = ["ב", "ח", "ה", "פ"];
+            return randomFromList(letters);
+        }
+
+        function randomIncorrectHebrewLetter() {
+            var letters = [
+                "א", "ג", "ד", "ו", "ז", "ט", "י", "כ", "ל", "מ",
+                "נ", "ס", "ע", "צ", "ק", "ר", "ש", "ת"
+            ];
+            return randomFromList(letters);
+        }
+
         function randomLetterEnglish() {
             var firstLetter = "a".charCodeAt(0);
             var idx = Math.floor(Math.random() * 4);
@@ -84,15 +97,25 @@
 
             for (var i = 0; i < 6; ++i) {
                 var elem = document.getElementById("idx_" + i);
-                elem.innerText = ".";
+                if (currentLevel == 1) {
+                    elem.innerText = ".";
+                    elem.style.color = "inherit";
+                } else if (currentLevel == 2) {
+                    elem.innerText = randomIncorrectHebrewLetter();
+                    elem.style.color = "red";
+                } else {
+                    elem.innerText = randomIncorrectHebrewLetter();
+                    elem.style.color = "inherit";
+                }
                 if (i === index) {
-                    var letter = randomLetter();
-                    if (letter === "א" || letter === "ב") {
+                    elem.style.color = "inherit";
+                    var letter = randomCorrectHebrewLetter();
+                    if (letter === "ב" || letter === "ח") {
                         expectedArrow = "ArrowRight";
-                    } else if (letter === "ג" || letter === "ד") {
+                    } else if (letter === "ה" || letter === "פ") {
                         expectedArrow = "ArrowLeft";
                     }
-                    elem.innerText = randomLetter();
+                    elem.innerText = letter;
                 }
             }
         }
@@ -108,6 +131,14 @@
             }, 120);
         }
 
+        function levelNumberToName() {
+            return {
+                1: 'Low Load',
+                2: 'Dilution',
+                3: 'High Load'
+            }[currentLevel];
+        }
+
         function collectDataFromStage3() {
             var delayMS = null;
             if (userFirstArrowTime) {
@@ -119,7 +150,9 @@
             userData.push({
                 delayMS: delayMS,
                 expectedArrow: expectedArrow,
-                selectedArrow: selectedArrow
+                selectedArrow: selectedArrow,
+                level: levelNumberToName(),
+                isTest: testMode ? "true" : "false"
             });
         }
 
@@ -129,22 +162,20 @@
             stage4BeginTime = performance.now();
 
             showElem("test_phase3", false);
-            setTimeout(function () {
-                numberOfIterations++;
-                collectDataFromStage3();
-                if (numberOfIterations < 3) {
-                    performStage1();
-                } else {
-                    endTest();
-                }
-            }, 500);
         }
 
         function endTest() {
             showElem("test_done", true);
-            console.log(userData);
-            uploadTestData();
             closeFullscreen();
+        }
+
+        function showLevelDescription() {
+            
+            showElem("test_description", true);
+            showElem("test_description_1", false);
+            showElem("test_description_2", false);
+            showElem("test_description_3", false);
+            showElem("test_description_" + currentLevel, true);
         }
 
         function onBeginTest() {
@@ -153,7 +184,9 @@
             showElem("test", true);
             showElem("begintestbutton", false);
 
-            beginCountdown();
+            currentLevel = levelOrder.pop();
+
+            showLevelDescription();
         }
 
         var docElem = document.documentElement;
@@ -181,15 +214,51 @@
             }
         }
 
+        function advanceLevel() {
+            numberOfIterations = 0;
+            if (!testMode) {
+                currentLevel = levelOrder.pop();
+            }
+            testMode = !testMode;
+            uploadTestData();
+            if (!currentLevel) {
+                endTest();
+            } else {
+                showLevelDescription();
+            }
+        }
+
         function onKeyDown(event) {
             if (currentStage == 4) {
                 if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
                     if (!userFirstArrow) {
                         userFirstArrowTime = performance.now();
                         userFirstArrow = event.key;
+
+                        if (testMode) {
+                            if (userFirstArrow === expectedArrow) {
+                                playSound("success");
+                            } else {
+                                playSound("failure");
+                            }
+                        }
+
+                        setTimeout(function () {
+                            numberOfIterations++;
+                            collectDataFromStage3();
+                            if (numberOfIterations < 3) {
+                                performStage1();
+                            } else {
+                                advanceLevel();
+                            }
+                        }, 500);
                     }
                 }
             }
+        }
+
+        function onBeginLevel() {
+            performStage1();
         }
 
         function uploadTestData() {
@@ -212,29 +281,17 @@
     </script>
 
 </head>
-<body style="background-color: black;
-    color: white;
-    text-align: center;
-    direction: rtl;
-    font-family: Arial;
-    height: 800px;
-    font-size: 42px;"
-      id="body"
-      onkeydown="onKeyDown(event)">
 
+<body onkeydown="onKeyDown(event)">
     <div id="test" style="display: none;
     vertical-align: middle;">
         <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br />
-
-        <div id="test_phase0">
-            המבחן יתחיל בעוד 10 שניות
-        </div>
 
         <div id="test_phase1" style="display: none">
             <br />
             <h1>+</h1>
         </div>
-        
+
         <!-- phase2 is pitch black, so just hiding both -->
 
         <div id="test_phase3" style="display: none">
@@ -255,6 +312,7 @@
             <h2 id="test_description_1">אתה בשלב 1</h2>
             <h2 id="test_description_2">אתה בשלב 2</h2>
             <h2 id="test_description_3">אתה בשלב 3</h2>
+            <button onclick="onBeginLevel()">התחל שלב</button>
         </div>
 
         <div id="test_done" style="display: none">
@@ -268,6 +326,9 @@
 
     <audio hidden="hidden" id="play_success">
         <source src="audio/success.mp3" />
+    </audio>
+    <audio hidden="hidden" id="play_failure">
+        <source src="audio/failure.mp3" />
     </audio>
 
     <audio hidden="hidden" id="play_a">
