@@ -7,3 +7,22 @@ body {
     height: 800px;
     font-size: 42px;
 }
+
+.centered {
+    height: 200px;
+    width: 800px;
+    position: absolute;
+    left: 50%;
+    margin-left: -400px;
+    top: 50%;
+    margin-top: -100px;
+}
+
+td {
+    padding-left: 40px;
+    padding-right: 40px;
+    width: 30px;
+    overflow: hidden;
+    display: inline-block;
+    white-space: nowrap;
+}

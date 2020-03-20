@@ -288,17 +288,15 @@
 <body onkeydown="onKeyDown(event)">
     <div id="test" style="display: none;
     vertical-align: middle;">
-        <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br />
 
-        <div id="test_phase1" style="display: none">
-            <br />
+        <div id="test_phase1" class="centered" style="display: none">
             <h1>+</h1>
         </div>
 
         <!-- phase2 is pitch black, so just hiding both -->
 
-        <div id="test_phase3" style="display: none">
-            <table cellpadding="50" align="center" style="text-align: center">
+        <div id="test_phase3" class="centered" style="display: none">
+            <table align="center" style="text-align: center; vertical-align: middle">
                 <tr>
                     <td><h1 id="idx_0"></h1></td>
                     <td><h1 id="idx_1"></h1></td>
@@ -315,6 +313,12 @@
             <h2 id="test_description_1">אתה בשלב 1</h2>
             <h2 id="test_description_2">אתה בשלב 2</h2>
             <h2 id="test_description_3">אתה בשלב 3</h2>
+            תשובה נכונה <audio controls id="play_success">
+                <source src="audio/success.mp3" />
+            </audio> <br />
+            תשובה שגויה <audio controls id="play_failure">
+                <source src="audio/failure.mp3" />
+            </audio> <br />
             <button onclick="onBeginLevel()" id="test_button_begin_level">התחל שלב</button>
         </div>
 
@@ -326,13 +330,6 @@
     <div id="begintestbutton">
         <button onclick="onBeginTest()">התחל מבחן</button>
     </div>
-
-    <audio hidden="hidden" id="play_success">
-        <source src="audio/success.mp3" />
-    </audio>
-    <audio hidden="hidden" id="play_failure">
-        <source src="audio/failure.mp3" />
-    </audio>
 
     <audio hidden="hidden" id="play_a">
         <source src="audio/a.mp3" />
