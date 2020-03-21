@@ -18,15 +18,34 @@ function replaceAll(str, toFind, toReplace) {
     return str.split(toFind).join(toReplace)
 }
 
+function makeDirIfNotExists(dir) {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+    }
+}
+
+function encodeUtf8(s) {
+    return unescape(encodeURIComponent(s));
+}
+
+makeDirIfNotExists('test_results');
+
 app.post('/post', bodyParser.json(), function (req, res) {
 
     console.log(req.body);
+    let header = ['??? ?????', '????? ????? / ????', '???? ???????', '????', '????? / ????', '?????? ??????', '?????? ?????', '???? ?????? ??????'];
+    let headerEncoded = [];
+    for (const v of header) {
+        headerEncoded.push(encodeUtf8(v));
+    }
     let csv = convertArrayToCSV(req.body, {
-        header: ['delay in milliseconds', 'was user correct', 'vocal letter', 'condition', 'is practice', 'expected arrow', 'selected arrow']
+        header: headerEncoded
     });
     console.log(csv);
-    
-    fs.writeFileSync('test_results/' + replaceAll(req.ipInfo.ip, ':', '_') + 'test_result.csv', csv);
+
+    let csvBom = '\ufeff' + csv;
+    let fileName = 'test_results/' + replaceAll(req.ipInfo.ip, ':', '_') + 'test_result.csv';
+    fs.writeFileSync(fileName, csvBom);
 
     res.send('');
 });

@@ -157,10 +157,10 @@
 
             userData.push({
                 delayMS,
-                isCorrect: expectedArrow === selectedArrow ? "true" : "false",
+                isCorrect: expectedArrow === selectedArrow ? "נכון" : "טעות",
                 currentVocalLetter,
                 level: levelNumberToName(),
-                isTest: testMode ? "true" : "false",
+                isTest: testMode ? "אימון" : "מבחן",
                 expectedArrow,
                 selectedArrow,
             });
@@ -185,10 +185,13 @@
             showElem("test_description", true);
             var elem = document.getElementById("test_button_begin_level");
             if (testMode) {
-                elem.innerText = "התחל שלב אימון";
+                elem.innerText = "להתחלת שלב האימון";
             } else {
-                elem.innerText = "התחל שלב";
+                elem.innerText = "להתחלת שלב המטלה";
             }
+
+            var titleElem = document.getElementById("test_description_title");
+            titleElem.innerText = testMode ? "אימון" : "מטלה";
         }
 
         function onBeginTest() {
@@ -234,9 +237,9 @@
 
             var elem = document.getElementById("test_button_begin_next_level");
             if (testMode) {
-                elem.innerText = "התחל שלב אימון";
+                elem.innerText = "להתחלת שלב האימון";
             } else {
-                elem.innerText = "התחל שלב";
+                elem.innerText = "להתחלת שלב המטלה";
             }
         }
 
@@ -360,12 +363,13 @@
         </div>
 
         <div id="test_description">
-            <h1>הוראות בחינה</h1>
-            <h2>יהיו מקשים תלחצו וזה יהיה טוב</h2>
-            ככה תישמע תשובה נכונה <audio controls id="play_success">
+            <h1>שלב <span id="test_description_title"></span></h1>
+            <h2>יש להקיש על מקש החץ הימני אם הופיעה האות ב' או ח'.</h2>
+            <h2>יש להקיש על מקש החץ השמאלי אם הופיעה האות ה' או פ'.</h2>
+            כך תישמע תשובה נכונה <audio controls id="play_success">
                 <source src="audio/success.mp3" />
             </audio> <br />
-            ככה תישמע תשובה שגויה <audio controls id="play_failure">
+            כך תישמע תשובה שגויה <audio controls id="play_failure">
                 <source src="audio/failure.mp3" />
             </audio> <br />
             <button type="button" class="btn btn-primary" onclick="onBeginLevel()" id="test_button_begin_level">התחל שלב</button>
@@ -382,7 +386,18 @@
     </div>
 
     <div id="begintestbutton">
-        <button type="button" class="btn btn-primary" onclick="onBeginTest()">התחל מבחן</button>
+        <pre>נבדק/ת יקר/ה,
+נא וודא/י כי האוזניות מחוברות, והרכב/הרכיבי אותן בהתאם לסימול המתאים: אוזן ימין - R, אוזן שמאל - L.
+במטלה הנוכחית יש להניח את היד על מקשי החצים במקלדת.
+בכל שלב במטלה, תופיע אות / מספר אותיות על גבי צג המחשב למשך זמן קצר.
+יש להקיש על מקש החץ הימני אם הופיעה האות ב' או ח'.
+יש להקיש על מקש החץ השמאלי אם הופיעה האות ה' או פ'.
+למטלה 3 חלקים.
+לפני תחילת כל חלק, תתנסה/י בשלב מקדים של אימון.
+השתדל/י לבצע את המטלה ללא הסחות דעת ובסביבה שקטה.
+לחץ/י על כפתור המשך על מנת להתקדם לשלב האימון.
+</pre>
+        <button type="button" class="btn btn-primary" onclick="onBeginTest()">להתחלת המענה</button>
     </div>
 
     <audio hidden="hidden" id="play_ב">
