@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, user-scalable=no" />
     <title>מבחן מגניב</title>
 
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://bootswatch.com/4/cyborg/bootstrap.min.css">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
     <link rel="stylesheet" type="text/css" href="style.css" />
 
     <script>
@@ -39,6 +45,7 @@
         function performStage1() {
             currentStage = 1;
             showElem("test_description", false);
+            showElem("test_level_checkpoint", false);
             showElem("test_phase1", true);
             setTimeout(function () {
                 performStage2();
@@ -54,7 +61,7 @@
 
             // For now playing 100ms beforehand
             setTimeout(function () {
-                playSound(randomLetterEnglish());
+                playSound(randomVocalLetter());
             }, 400);
         }
 
@@ -77,34 +84,25 @@
             return randomFromList(letters);
         }
 
-        function randomIncorrectHebrewLetter() {
-            var letters = [
-                "א", "ג", "ד", "ו", "ז", "ט", "י", "כ", "ל", "מ",
-                "נ", "ס", "ע", "צ", "ק", "ר", "ש", "ת"
-            ];
+        function randomVocalLetter() {
+            var letters = ["ב", "ח", "ה", "פ", "ו"];
             return randomFromList(letters);
-        }
-
-        function randomLetterEnglish() {
-            var firstLetter = "a".charCodeAt(0);
-            var idx = Math.floor(Math.random() * 4);
-            return String.fromCharCode(firstLetter + idx);
         }
 
         function generateStage3Text() {
 
             var index = Math.floor(Math.random() * 6);
 
+            var letters = [
+                "א", "י", "ע", "צ", "ר"
+            ];
+
+            shuffle(letters);
+
             for (var i = 0; i < 6; ++i) {
                 var elem = document.getElementById("idx_" + i);
                 if (currentLevel == 1) {
                     elem.innerText = ".";
-                    elem.style.color = "inherit";
-                } else if (currentLevel == 2) {
-                    elem.innerText = randomIncorrectHebrewLetter();
-                    elem.style.color = "red";
-                } else {
-                    elem.innerText = randomIncorrectHebrewLetter();
                     elem.style.color = "inherit";
                 }
                 if (i === index) {
@@ -116,6 +114,14 @@
                         expectedArrow = "ArrowLeft";
                     }
                     elem.innerText = letter;
+                } else {
+                    if (currentLevel == 2) {
+                        elem.innerText = letters.pop();
+                        elem.style.color = "red";
+                    } else {
+                        elem.innerText = letters.pop();
+                        elem.style.color = "inherit";
+                    }
                 }
             }
         }
@@ -170,15 +176,11 @@
         }
 
         function showLevelDescription() {
-            
+            showCursor(true);
             showElem("test_description", true);
-            showElem("test_description_1", false);
-            showElem("test_description_2", false);
-            showElem("test_description_3", false);
-            showElem("test_description_" + currentLevel, true);
             var elem = document.getElementById("test_button_begin_level");
             if (testMode) {
-                elem.innerText = "התחל שלב ניסיוני";
+                elem.innerText = "התחל שלב אימון";
             } else {
                 elem.innerText = "התחל שלב";
             }
@@ -186,7 +188,7 @@
 
         function onBeginTest() {
             openFullscreen();
-        
+
             showElem("test", true);
             showElem("begintestbutton", false);
 
@@ -220,6 +222,19 @@
             }
         }
 
+        function showLevelCheckpoint() {
+
+            showCursor(true);
+            showElem("test_level_checkpoint", true);
+
+            var elem = document.getElementById("test_button_begin_next_level");
+            if (testMode) {
+                elem.innerText = "התחל שלב אימון";
+            } else {
+                elem.innerText = "התחל שלב";
+            }
+        }
+
         function advanceLevel() {
             numberOfIterations = 0;
             if (!testMode) {
@@ -230,7 +245,7 @@
             if (!currentLevel) {
                 endTest();
             } else {
-                showLevelDescription();
+                showLevelCheckpoint();
             }
         }
 
@@ -263,13 +278,19 @@
             }
         }
 
+        function showCursor(show) {
+            var body = document.getElementById("body");
+            body.style.cursor = show ? "inherit" : "none";
+        }
+
         function onBeginLevel() {
+            showCursor(false);
             performStage1();
         }
 
         function uploadTestData() {
             var xhr = new XMLHttpRequest();
-            var url = "http://localhost:3232/post";
+            var url = "../post";
             xhr.open("POST", url, true);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.onreadystatechange = function () {
@@ -285,7 +306,7 @@
 
 </head>
 
-<body onkeydown="onKeyDown(event)">
+<body onkeydown="onKeyDown(event)" id="body">
     <div id="test" style="display: none;
     vertical-align: middle;">
 
@@ -309,17 +330,20 @@
         </div>
 
         <div id="test_description">
-            <h1>טקסט הוראות על בחינה</h1>
-            <h2 id="test_description_1">אתה בשלב 1</h2>
-            <h2 id="test_description_2">אתה בשלב 2</h2>
-            <h2 id="test_description_3">אתה בשלב 3</h2>
-            תשובה נכונה <audio controls id="play_success">
+            <h1>הוראות בחינה</h1>
+            <h2>יהיו מקשים תלחצו וזה יהיה טוב</h2>
+            ככה תישמע תשובה נכונה <audio controls id="play_success">
                 <source src="audio/success.mp3" />
             </audio> <br />
-            תשובה שגויה <audio controls id="play_failure">
+            ככה תישמע תשובה שגויה <audio controls id="play_failure">
                 <source src="audio/failure.mp3" />
             </audio> <br />
-            <button onclick="onBeginLevel()" id="test_button_begin_level">התחל שלב</button>
+            <button type="button" class="btn btn-primary" onclick="onBeginLevel()" id="test_button_begin_level">התחל שלב</button>
+        </div>
+
+        <div id="test_level_checkpoint" style="display: none">
+            <h2>סיימת שלב</h2>
+            <button type="button" class="btn btn-primary" onclick="onBeginLevel()" id="test_button_begin_next_level">התחל שלב</button>
         </div>
 
         <div id="test_done" style="display: none">
@@ -328,20 +352,23 @@
     </div>
 
     <div id="begintestbutton">
-        <button onclick="onBeginTest()">התחל מבחן</button>
+        <button type="button" class="btn btn-primary" onclick="onBeginTest()">התחל מבחן</button>
     </div>
 
-    <audio hidden="hidden" id="play_a">
-        <source src="audio/a.mp3" />
+    <audio hidden="hidden" id="play_ב">
+        <source src="audio/ב.mp3" />
     </audio>
-    <audio hidden="hidden" id="play_b">
-        <source src="audio/b.mp3" />
+    <audio hidden="hidden" id="play_ח">
+        <source src="audio/ח.mp3" />
     </audio>
-    <audio hidden="hidden" id="play_c">
-        <source src="audio/c.mp3" />
+    <audio hidden="hidden" id="play_פ">
+        <source src="audio/פ.mp3" />
     </audio>
-    <audio hidden="hidden" id="play_d">
-        <source src="audio/d.mp3" />
+    <audio hidden="hidden" id="play_ה">
+        <source src="audio/ה.mp3" />
+    </audio>
+    <audio hidden="hidden" id="play_ו">
+        <source src="audio/ו.mp3" />
     </audio>
 </body>
 </html>
