@@ -27,6 +27,8 @@ app.post('/post', bodyParser.json(), function (req, res) {
     console.log(csv);
     
     fs.writeFileSync('test_results/' + replaceAll(req.ipInfo.ip, ':', '_') + 'test_result.csv', csv);
+
+    res.send('');
 });
 
 module.exports = router;

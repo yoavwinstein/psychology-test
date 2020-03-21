@@ -6,8 +6,20 @@ body {
     font-family: Arial;
     height: 800px;
     font-size: 42px;
+    /* Make text unselectable to avoid test disruptions */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
+
+    min-height: 100%;
+}
+html {
+    height: 100%;
 }
 
+body {
+}
 .centered {
     height: 200px;
     width: 800px;

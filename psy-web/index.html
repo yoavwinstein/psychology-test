@@ -101,10 +101,7 @@
 
             for (var i = 0; i < 6; ++i) {
                 var elem = document.getElementById("idx_" + i);
-                if (currentLevel == 1) {
-                    elem.innerText = ".";
-                    elem.style.color = "inherit";
-                }
+
                 if (i === index) {
                     elem.style.color = "inherit";
                     var letter = randomCorrectHebrewLetter();
@@ -115,10 +112,13 @@
                     }
                     elem.innerText = letter;
                 } else {
-                    if (currentLevel == 2) {
+                    if (currentLevel == 1) {
+                        elem.innerText = ".";
+                        elem.style.color = "inherit";
+                    } else if (currentLevel == 2) {
                         elem.innerText = letters.pop();
                         elem.style.color = "red";
-                    } else {
+                    } else if (currentLevel == 3) {
                         elem.innerText = letters.pop();
                         elem.style.color = "inherit";
                     }
@@ -172,6 +172,7 @@
         }
 
         function endTest() {
+            showCursor(true);
             showElem("test_done", true);
             closeFullscreen();
         }
