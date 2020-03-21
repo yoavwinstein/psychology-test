@@ -22,7 +22,7 @@ app.post('/post', bodyParser.json(), function (req, res) {
 
     console.log(req.body);
     let csv = convertArrayToCSV(req.body, {
-        header: ['delay in milliseconds', 'expected arrow', 'selected arrow', 'condition', 'is practice']
+        header: ['delay in milliseconds', 'was user correct', 'condition', 'is practice', 'expected arrow', 'selected arrow']
     });
     console.log(csv);
     

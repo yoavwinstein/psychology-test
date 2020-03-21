@@ -154,11 +154,12 @@
             selectedArrow = userFirstArrow ? userFirstArrow : null
 
             userData.push({
-                delayMS: delayMS,
-                expectedArrow: expectedArrow,
-                selectedArrow: selectedArrow,
+                delayMS,
+                isCorrect: expectedArrow === selectedArrow ? "true" : "false",
                 level: levelNumberToName(),
-                isTest: testMode ? "true" : "false"
+                isTest: testMode ? "true" : "false",
+                expectedArrow,
+                selectedArrow,
             });
         }
 
