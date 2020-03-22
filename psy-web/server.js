@@ -10,6 +10,10 @@ let app = express();
 let router = express.Router()
 let port = process.env.PORT || 3232;
 
+let participantsDict = {};
+
+const TEST_RESULTS_DIR = 'test_results';
+
 app.use(expressip().getIpInfoMiddleware);
 router.use('/', express.static('.'));
 router.use('/audio', express.static('/audio'));
@@ -24,8 +28,13 @@ function makeDirIfNotExists(dir) {
     }
 }
 
-function encodeUtf8(s) {
-    return unescape(encodeURIComponent(s));
+function buildPathFromIndex(idx) {
+    return TEST_RESULTS_DIR + '/' + 'participant' + idx + '.csv';
+}
+
+function getCurrentlyAvailableIndex() {
+    for (var i = 0; fs.existsSync(buildPathFromIndex(i)); i++) { }
+    return i;
 }
 
 makeDirIfNotExists('test_results');
@@ -34,17 +43,20 @@ app.post('/post', bodyParser.json(), function (req, res) {
 
     console.log(req.body);
     let header = ['זמן תגובה', 'תשובה נכונה / טעות', 'האות שהושמעה', 'תנאי', 'אימון / מבחן', 'התשובה הנכונה', 'התשובה בפועל', 'אחוז תשובות נכונות'];
-    let headerEncoded = [];
-    for (const v of header) {
-        headerEncoded.push(encodeUtf8(v));
-    }
     let csv = convertArrayToCSV(req.body, {
-        header: headerEncoded
+        header
     });
     console.log(csv);
 
     let csvBom = '\ufeff' + csv;
-    let fileName = 'test_results/' + replaceAll(req.ipInfo.ip, ':', '_') + 'test_result.csv';
+    let idx;
+    if (req.ipInfo.ip in participantsDict) {
+        idx = participantsDict[req.ipInfo.ip];
+    } else {
+        idx = getCurrentlyAvailableIndex();
+        participantsDict[req.ipInfo.ip] = idx;
+    }
+    let fileName = buildPathFromIndex(idx);
     fs.writeFileSync(fileName, csvBom);
 
     res.send('');
