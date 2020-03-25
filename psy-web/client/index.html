@@ -255,11 +255,11 @@
             var elem = document.getElementById("test_button_begin_next_level");
             var checkpointDescription = document.getElementById("test_level_checkpoint_description");
             if (testMode) {
-                elem.innerText = "להתחלת שלב המטלה של שלב " + currentUserStage;
-                checkpointDescription.innerText = "סיימת את שלב האימון של שלב " + currentUserStage;
+                elem.innerText = "להתחלת שלב המטלה של חלק " + currentUserStage;
+                checkpointDescription.innerText = "סיימת את שלב האימון של חלק " + currentUserStage;
             } else {
-                elem.innerText = "להתחלת שלב האימון של שלב " + (currentUserStage + 1);
-                checkpointDescription.innerText = "סיימת את שלב המטלה של שלב " + currentUserStage;
+                elem.innerText = "להתחלת שלב האימון של חלק " + (currentUserStage + 1);
+                checkpointDescription.innerText = "סיימת את שלב המטלה של חלק " + currentUserStage;
             }
         }
 
