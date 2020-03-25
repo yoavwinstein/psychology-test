@@ -261,6 +261,9 @@
                 elem.innerText = "להתחלת שלב האימון של חלק " + (currentUserStage + 1);
                 checkpointDescription.innerText = "סיימת את שלב המטלה של חלק " + currentUserStage;
             }
+            if (!testMode) {
+                currentUserStage++;
+            }
         }
 
         function advanceLevel() {
@@ -334,9 +337,6 @@
 
         function onBeginLevel() {
             showCursor(false);
-            if (!testMode) {
-                currentUserStage++;
-            }
             beginTestCountdown();
         }
 
