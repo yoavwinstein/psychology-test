@@ -15,8 +15,12 @@
     <link rel="stylesheet" type="text/css" href="style.css" />
 
     <script>
-        var NUMBER_OF_ANSWERS = 3;
+        var NUMBER_OF_ANSWERS = {
+            true: 16, // testMode = true
+            false: 60 // testMode = false
+        };
 
+        var currentUserStage = 1;
         var numberOfIterations = 0;
         var currentStage = 0;
         var expectedArrow = null;
@@ -249,11 +253,11 @@
             var elem = document.getElementById("test_button_begin_next_level");
             var checkpointDescription = document.getElementById("test_level_checkpoint_description");
             if (testMode) {
-                elem.innerText = "להתחלת שלב האימון";
-                checkpointDescription.innerText = "סיימת את שלב המטלה";
+                elem.innerText = "להתחלת שלב המטלה של שלב " + currentUserStage;
+                checkpointDescription.innerText = "סיימת את שלב האימון של שלב " + currentUserStage;
             } else {
-                elem.innerText = "להתחלת שלב המטלה";
-                checkpointDescription.innerText = "סיימת את שלב האימון";
+                elem.innerText = "להתחלת שלב האימון של שלב " + (currentUserStage + 1);
+                checkpointDescription.innerText = "סיימת את שלב המטלה של שלב " + currentUserStage;
             }
         }
 
@@ -262,13 +266,13 @@
             if (!testMode) {
                 currentLevel = levelOrder.pop();
             }
-            testMode = !testMode;
             uploadTestData();
             if (!currentLevel) {
                 endTest();
             } else {
                 showLevelCheckpoint();
             }
+            testMode = !testMode;
         }
 
         function beginTestCountdown() {
@@ -309,7 +313,7 @@
                         setTimeout(function () {
                             numberOfIterations++;
                             collectDataFromStage3();
-                            if (numberOfIterations < 3) {
+                            if (numberOfIterations < NUMBER_OF_ANSWERS[testMode]) {
                                 performStage1();
                             } else {
                                 advanceLevel();
@@ -327,6 +331,9 @@
 
         function onBeginLevel() {
             showCursor(false);
+            if (!testMode) {
+                currentUserStage++;
+            }
             beginTestCountdown();
         }
 
@@ -395,12 +402,14 @@
 
         <div id="test_level_checkpoint" style="display: none">
             <h2 id="test_level_checkpoint_description">סיימת שלב</h2>
+            <h2>יש להקיש על מקש החץ הימני אם הופיעה האות ב' או ח'.</h2>
+            <h2>יש להקיש על מקש החץ השמאלי אם הופיעה האות ה' או פ'.</h2>
             <button type="button" class="btn btn-primary" onclick="onBeginLevel()" id="test_button_begin_next_level">התחל שלב</button>
         </div>
 
         <div id="test_done" style="display: none">
             <h1><pre>המטלה הסתיימה.
-אני מודים לך מקרב לב על השתתפותך בניסוי.
+אנו מודים לך מקרב לב על השתתפותך בניסוי.
 עדי דוידוב ואורי וינשטיין
 
 האתר פותח ע"י <a href="https://github.com/yoavwinstein">יואב וינשטיין</a></pre></h1>
@@ -408,7 +417,7 @@
     </div>
 
     <div id="begintestbutton">
-        <pre>נבדק/ת יקר/ה,
+        <pre>משתתף/ת יקר/ה,
 נא וודא/י כי האוזניות מחוברות, והרכב/הרכיבי אותן בהתאם לסימול המתאים: אוזן ימין - R, אוזן שמאל - L.
 במטלה הנוכחית יש להניח את היד על מקשי החצים במקלדת.
 בכל שלב במטלה, תופיע אות / מספר אותיות על גבי צג המחשב למשך זמן קצר.

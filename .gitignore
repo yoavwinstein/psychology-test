@@ -107,3 +107,4 @@ psy-web/obj
 psy-web/bin
 psy-web/test_results
 psy-web/psy-web.njsproj.user
+.vs
