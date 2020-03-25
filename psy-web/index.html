@@ -20,6 +20,8 @@
             false: 60 // testMode = false
         };
 
+        var config = {};
+
         var currentUserStage = 1;
         var numberOfIterations = 0;
         var currentStage = 0;
@@ -70,7 +72,7 @@
             setTimeout(function () {
                 currentVocalLetter = randomVocalLetter();
                 playSound(currentVocalLetter);
-            }, 400);
+            }, config.vocalDelayMS);
         }
 
         function replaceAtIndex(str, index, replacement) {
@@ -313,7 +315,8 @@
                         setTimeout(function () {
                             numberOfIterations++;
                             collectDataFromStage3();
-                            if (numberOfIterations < NUMBER_OF_ANSWERS[testMode]) {
+                            let nameInConfig = testMode ? "testMode" : "normalMode";
+                            if (numberOfIterations < config.numberOfRequiredAnswers[nameInConfig]) {
                                 performStage1();
                             } else {
                                 advanceLevel();
@@ -353,6 +356,13 @@
 
         function bodyLoad() {
             document.getElementById("play_success").playbackRate = 1.5;
+
+            fetch('config.json')
+            .then(res => res.json())
+            .then((js) => {
+                config = js;
+            })
+            .catch(err => { throw err });
         }
 
     </script>
