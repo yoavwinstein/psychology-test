@@ -28,12 +28,26 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="index.html" />
+    <Content Include="client\audio\a.mp3" />
+    <Content Include="client\audio\b.mp3" />
+    <Content Include="client\audio\c.mp3" />
+    <Content Include="client\audio\d.mp3" />
+    <Content Include="client\audio\failure.mp3" />
+    <Content Include="client\audio\success.mp3" />
+    <Content Include="client\audio\ב.mp3" />
+    <Content Include="client\audio\ה.mp3" />
+    <Content Include="client\audio\ו.mp3" />
+    <Content Include="client\audio\ח.mp3" />
+    <Content Include="client\audio\פ.mp3" />
+    <Content Include="client\config.json" />
+    <Content Include="client\index.html" />
+    <Content Include="client\style.css" />
     <Content Include="server.js" />
     <Content Include="package.json" />
-    <Content Include="style.css">
-      <SubType>Code</SubType>
-    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="client\" />
+    <Folder Include="client\audio\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />
   <ProjectExtensions>
