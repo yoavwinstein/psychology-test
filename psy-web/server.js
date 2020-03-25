@@ -15,8 +15,7 @@ let participantsDict = {};
 const TEST_RESULTS_DIR = 'test_results';
 
 app.use(expressip().getIpInfoMiddleware);
-router.use('/', express.static('.'));
-router.use('/audio', express.static('/audio'));
+router.use('/', express.static('./client'));
 
 function replaceAll(str, toFind, toReplace) {
     return str.split(toFind).join(toReplace)
