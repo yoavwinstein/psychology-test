@@ -41,7 +41,7 @@ makeDirIfNotExists('test_results');
 app.post('/post', bodyParser.json(), function (req, res) {
 
     console.log(req.body);
-    let header = ['זמן תגובה', 'תשובה נכונה / טעות', 'האות שהושמעה', 'תנאי', 'אימון / מבחן', 'התשובה הנכונה', 'התשובה בפועל', 'אחוז תשובות נכונות'];
+    let header = ['זמן תגובה', 'תשובה נכונה / טעות', 'האות שהושמעה', 'תנאי', 'אימון / מבחן', 'התשובה הנכונה', 'התשובה בפועל', 'אחוז תשובות נכונות', 'מין', 'שנה'];
     let csv = convertArrayToCSV(req.body, {
         header
     });

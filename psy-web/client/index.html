@@ -15,11 +15,6 @@
     <link rel="stylesheet" type="text/css" href="style.css" />
 
     <script>
-        var NUMBER_OF_ANSWERS = {
-            true: 16, // testMode = true
-            false: 60 // testMode = false
-        };
-
         var config = {};
 
         var currentUserStage = 1;
@@ -32,8 +27,11 @@
         var stage4BeginTime;
         var levelOrder = [1, 2, 3];
         var currentLevel = 0;
-        var userData = []
+        var userData = [];
+        var randomizedIterations = [];
         var testMode = true;
+        var paritipantGender = null;
+        var participantYear = null;
 
         function shuffle(array) {
             array.sort(() => Math.random() - 0.5);
@@ -51,8 +49,40 @@
             elem.style.display = shouldShow ? "inherit" : "none";
         }
 
+        // The requirements for non-training levels is as follows:
+        // - 20 levels where the heard letter matches the written one
+        // - 20 levels where the heard letter does not match the written one
+        // - 20 levels where the neutral letter is heard
+        // The iterations are pre-determined in order to create such situations like that
+        function createIterations() {
+
+            randomizedIterations = [];
+            var correctLetter = randomCorrectHebrewLetter();
+            let nameInConfig = testMode ? "testMode" : "normalMode";
+            for (let i = 0; i < config.numberOfRequiredAnswers[nameInConfig]; ++i) {
+                if (i % 3 == 0) {
+                    randomizedIterations.push({
+                        correctLetter,
+                        vocalLetter: correctLetter
+                    });
+                } else if (i % 3 == 1) {
+                    randomizedIterations.push({
+                        correctLetter,
+                        vocalLetter: "ו"
+                    });
+                } else if (i % 3 == 2) {
+                    randomizedIterations.push({
+                        correctLetter,
+                        vocalLetter: randomFromList(getCorrectLettersExcluding(correctLetter))
+                    });
+                }
+            }
+            shuffle(randomizedIterations);
+        }
+
         function performStage1() {
             currentStage = 1;
+            createIterations();
             showElem("test_description", false);
             showElem("test_level_checkpoint", false);
             showElem("test_phase1", true);
@@ -70,7 +100,7 @@
 
             // For now playing 100ms beforehand
             setTimeout(function () {
-                currentVocalLetter = randomVocalLetter();
+                currentVocalLetter = randomizedIterations[numberOfIterations].vocalLetter;
                 playSound(currentVocalLetter);
             }, config.vocalDelayMS);
         }
@@ -79,24 +109,27 @@
             return str.substr(0, index) + replacement + str.substr(index + replacement.length);
         }
 
-        function randomLetter() {
-            var firstLetter = "א".charCodeAt(0);
-            var idx = Math.floor(Math.random() * 4);
-            return String.fromCharCode(firstLetter + idx);
-        }
-
         function randomFromList(items) {
             return items[Math.floor(Math.random() * items.length)];
         }
 
-        function randomCorrectHebrewLetter() {
-            var letters = ["ב", "ח", "ה", "פ"];
-            return randomFromList(letters);
+        function getCorrectLetters() {
+            return ["ק", "ש", "מ", "ח"];
         }
 
-        function randomVocalLetter() {
-            var letters = ["ב", "ח", "ה", "פ", "ו"];
-            return randomFromList(letters);
+        function getCorrectLettersExcluding(letter) {
+            var letters = getCorrectLetters();
+            var lettersFiltered = [];
+            for (var i = 0; i < letters.length; ++i) {
+                if (letters[i] !== letter) {
+                    lettersFiltered.push(letters[i]);
+                }
+            }
+            return lettersFiltered;
+        }
+
+        function randomCorrectHebrewLetter() {
+            return randomFromList(getCorrectLetters());
         }
 
         function generateStage3Text() {
@@ -114,10 +147,10 @@
 
                 if (i === index) {
                     elem.style.color = "inherit";
-                    var letter = randomCorrectHebrewLetter();
-                    if (letter === "ב" || letter === "ח") {
+                    var letter = randomizedIterations[numberOfIterations].correctLetter;
+                    if (letter === "מ" || letter === "ח") {
                         expectedArrow = "ArrowRight";
-                    } else if (letter === "ה" || letter === "פ") {
+                    } else if (letter === "ק" || letter === "ש") {
                         expectedArrow = "ArrowLeft";
                     }
                     elem.innerText = letter;
@@ -211,7 +244,30 @@
             titleElem.innerText = testMode ? "אימון" : "מטלה";
         }
 
+        function getSelectedGender() {
+            var maleElem = document.getElementById("radio_genderMale");
+            return maleElem.checked ? "זכר" : "נקבה";
+        }
+
         function onBeginTest() {
+
+            paritipantGender = getSelectedGender();
+            participantYear = document.getElementById("text_year").value;
+
+            let nothing = " ";
+            userData.push({
+                a: nothing,
+                b: nothing,
+                c: nothing,
+                d: nothing,
+                e: nothing,
+                f: nothing,
+                g: nothing,
+                h: nothing,
+                paritipantGender,
+                participantYear
+            });
+
             openFullscreen();
 
             showElem("test", true);
@@ -400,8 +456,8 @@
         <div id="test_description">
             <h1>שלב <span id="test_description_title"></span></h1>
             <h2>תזכורת</h2>
-            <h2>יש להקיש על מקש החץ הימני אם הופיעה האות ב' או ח'.</h2>
-            <h2>יש להקיש על מקש החץ השמאלי אם הופיעה האות ה' או פ'.</h2>
+            <h2>יש להקיש על מקש החץ הימני אם הופיעה האות ח' או מ'.</h2>
+            <h2>יש להקיש על מקש החץ השמאלי אם הופיעה האות ש' או ק'.</h2>
             כך תישמע תשובה נכונה <audio controls id="play_success">
                 <source src="audio/success.mp3" />
             </audio> <br />
@@ -410,12 +466,12 @@
             </audio> <br />
             <button type="button" class="btn btn-primary" onclick="onBeginLevel()" id="test_button_begin_level">התחל שלב</button>
         </div>
-
+        
         <div id="test_level_checkpoint" style="display: none">
             <h2 id="test_level_checkpoint_description">סיימת שלב</h2>
             <h2>תזכורת</h2>
-            <h2>יש להקיש על מקש החץ הימני אם הופיעה האות ב' או ח'.</h2>
-            <h2>יש להקיש על מקש החץ השמאלי אם הופיעה האות ה' או פ'.</h2>
+            <h2>יש להקיש על מקש החץ הימני אם הופיעה האות ח' או מ'.</h2>
+            <h2>יש להקיש על מקש החץ השמאלי אם הופיעה האות ש' או ק'.</h2>
             <button type="button" class="btn btn-primary" onclick="onBeginLevel()" id="test_button_begin_next_level">התחל שלב</button>
         </div>
 
@@ -433,28 +489,39 @@
 נא וודא/י כי האוזניות מחוברות, והרכב/הרכיבי אותן בהתאם לסימול המתאים: אוזן ימין - R, אוזן שמאל - L.
 במטלה הנוכחית יש להניח את היד על מקשי החצים במקלדת.
 בכל שלב במטלה, תופיע אות / מספר אותיות על גבי צג המחשב למשך זמן קצר.
-יש להקיש על מקש החץ הימני אם הופיעה האות ב' או ח'.
-יש להקיש על מקש החץ השמאלי אם הופיעה האות ה' או פ'.
+יש להקיש על מקש החץ הימני אם הופיעה האות ח' או מ'.
+יש להקיש על מקש החץ השמאלי אם הופיעה האות ש' או ק'.
 למטלה 3 חלקים.
 לפני תחילת כל חלק, תתנסה/י בשלב מקדים של אימון.
 יש להקיש על המקש הנכון מהר ככל האפשר.
 השתדל/י לבצע את המטלה ללא הסחות דעת ובסביבה שקטה.
 לחץ/י על כפתור המשך על מנת להתקדם לשלב האימון.
 </pre>
+        מין
+        <div class="custom-control custom-radio">
+            <input type="radio" class="custom-control-input" id="radio_genderMale" name="radio_gender">
+            <label class="custom-control-label" for="radio_genderMale">זכר</label>
+        </div>
+        <div class="custom-control custom-radio">
+            <input type="radio" class="custom-control-input" id="radio_genderFemale" name="radio_gender" checked>
+            <label class="custom-control-label" for="radio_genderFemale">נקבה</label>
+        </div>
+        שנת לידה <input type="text" id="text_year" />
+        <br />
         <button type="button" class="btn btn-primary" onclick="onBeginTest()">להתחלת המענה</button>
     </div>
 
-    <audio hidden="hidden" id="play_ב">
-        <source src="audio/ב.mp3" />
-    </audio>
     <audio hidden="hidden" id="play_ח">
         <source src="audio/ח.mp3" />
     </audio>
-    <audio hidden="hidden" id="play_פ">
-        <source src="audio/פ.mp3" />
+    <audio hidden="hidden" id="play_מ">
+        <source src="audio/מ.mp3" />
     </audio>
-    <audio hidden="hidden" id="play_ה">
-        <source src="audio/ה.mp3" />
+    <audio hidden="hidden" id="play_ש">
+        <source src="audio/ש.mp3" />
+    </audio>
+    <audio hidden="hidden" id="play_ק">
+        <source src="audio/ק.mp3" />
     </audio>
     <audio hidden="hidden" id="play_ו">
         <source src="audio/ו.mp3" />
