@@ -60,24 +60,30 @@
 
             randomizedIterations = [];
             let nameInConfig = testMode ? "testMode" : "normalMode";
-            for (let i = 0; i < config.numberOfRequiredAnswers[nameInConfig]; ++i) {
-                var correctLetter = randomCorrectHebrewLetter();
-                if (i % 3 == 0) {
-                    randomizedIterations.push({
-                        correctLetter,
-                        vocalLetter: correctLetter
-                    });
-                } else if (i % 3 == 1) {
-                    randomizedIterations.push({
-                        correctLetter,
-                        vocalLetter: "ו"
-                    });
-                } else if (i % 3 == 2) {
-                    randomizedIterations.push({
-                        correctLetter,
-                        vocalLetter: randomFromList(getCorrectLettersExcluding(correctLetter))
-                    });
-                }
+            let numberOfRequiredAnswers = config.numberOfRequiredAnswers[nameInConfig];
+
+            const correctLettersList = getCorrectLetters();
+            const vocalLettersList = getVocalLetters();
+
+            let correctLetters = [];
+            let vocalLetters = [];
+
+            for (let i = 0; i < numberOfRequiredAnswers; ++i) {
+                let correctLetter = correctLettersList[i % correctLettersList.length];
+                correctLetters.push(correctLetter);
+
+                let vocalLetter = vocalLettersList[i % vocalLettersList.length];
+                vocalLetters.push(vocalLetter);
+            }
+
+            shuffle(correctLetters);
+            shuffle(vocalLetters);
+
+            for (let i = 0; i < numberOfRequiredAnswers; ++i) {
+                randomizedIterations.push({
+                    correctLetter: correctLetters[i],
+                    vocalLetter: vocalLetters[i]
+                });
             }
             shuffle(randomizedIterations);
         }
@@ -116,6 +122,12 @@
 
         function getCorrectLetters() {
             return ["ק", "ש", "מ", "ח"];
+        }
+
+        function getVocalLetters() {
+            let correctLetters = getCorrectLetters();
+            correctLetters.push("ו");
+            return correctLetters;
         }
 
         function getCorrectLettersExcluding(letter) {
