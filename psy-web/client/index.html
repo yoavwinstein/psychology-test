@@ -30,8 +30,10 @@
         var userData = [];
         var randomizedIterations = [];
         var testMode = true;
+        var numberOfWrongAnswers = 0;
         var paritipantGender = null;
         var participantYear = null;
+        var isBreak = false;
 
         function shuffle(array) {
             array.sort(() => Math.random() - 0.5);
@@ -57,9 +59,9 @@
         function createIterations() {
 
             randomizedIterations = [];
-            var correctLetter = randomCorrectHebrewLetter();
             let nameInConfig = testMode ? "testMode" : "normalMode";
             for (let i = 0; i < config.numberOfRequiredAnswers[nameInConfig]; ++i) {
+                var correctLetter = randomCorrectHebrewLetter();
                 if (i % 3 == 0) {
                     randomizedIterations.push({
                         correctLetter,
@@ -82,7 +84,6 @@
 
         function performStage1() {
             currentStage = 1;
-            createIterations();
             showElem("test_description", false);
             showElem("test_level_checkpoint", false);
             showElem("test_phase1", true);
@@ -274,6 +275,7 @@
             showElem("begintestbutton", false);
 
             currentLevel = levelOrder.pop();
+            createIterations();
 
             showLevelDescription();
         }
@@ -307,19 +309,28 @@
 
             showCursor(true);
             showElem("test_level_checkpoint", true);
+            showElem("test_level_checkpoint_try_practice_again", true);
 
-            var elem = document.getElementById("test_button_begin_next_level");
+            var buttonNextLevelElem = document.getElementById("test_button_begin_next_level");
+            buttonNextLevelElem.disabled = false;
+            var textNextLevelElem = document.getElementById("test_text_begin_next_level");
+            var textNextPracticeElem = document.getElementById("test_text_begin_next_practice");
             var checkpointDescription = document.getElementById("test_level_checkpoint_description");
-            if (testMode) {
-                elem.innerText = "להתחלת שלב המטלה של חלק " + currentUserStage;
-                checkpointDescription.innerText = "סיימת את שלב האימון של חלק " + currentUserStage;
-            } else {
-                elem.innerText = "להתחלת שלב האימון של חלק " + (currentUserStage + 1);
-                checkpointDescription.innerText = "סיימת את שלב המטלה של חלק " + currentUserStage;
-            }
+            let lastStagePerformed = currentUserStage;
             if (!testMode) {
-                currentUserStage++;
+                lastStagePerformed--;
+                buttonNextLevelElem.disabled = true;
+            } else if (numberOfWrongAnswers >= 5) {
+                showElem("test_level_checkpoint_try_practice_again", true);
+                buttonNextLevelElem.disabled = true;
             }
+            if (testMode) {
+                checkpointDescription.innerText = "סיימת את שלב האימון של חלק " + lastStagePerformed;
+            } else {
+                checkpointDescription.innerText = "סיימת את שלב המטלה של חלק " + lastStagePerformed;
+            }
+            textNextLevelElem.innerText = currentUserStage.toString();
+            textNextPracticeElem.innerText = (currentUserStage).toString();
         }
 
         function advanceLevel() {
@@ -331,19 +342,24 @@
             if (!currentLevel) {
                 endTest();
             } else {
+                if (!testMode) {
+                    currentUserStage++;
+                }
                 showLevelCheckpoint();
             }
-            testMode = !testMode;
+            numberOfWrongAnswers = 0;
         }
 
         function beginTestCountdown() {
             var i = 10;
+            var testOrPracticeTextElem = document.getElementById("test_countdown_practice_or_test");
             var countdownText = document.getElementById("test_countdown");
             showElem("test_description", false);
             showElem("test_level_checkpoint", false);
             showElem("test_phase1", true);
             showElem("test_countdown_container", true);
             countdownText.innerText = i;
+            testOrPracticeTextElem.innerText = testMode ? "אימון" : "מבחן";
             var interval = setInterval(function () {
 
                 i--;
@@ -356,6 +372,16 @@
             }, 1000);
         }
 
+        function shouldPerformBreak() {
+            let nameInConfig = testMode ? "testMode" : "normalMode";
+            return numberOfIterations === (config.numberOfRequiredAnswers[nameInConfig] / 2) && !testMode;
+        }
+
+        function performBreak() {
+            showElem("test_break", true);
+            isBreak = true;
+        }
+
         function onKeyDown(event) {
             if (currentStage == 4) {
                 if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
@@ -363,25 +389,30 @@
                         userFirstArrowTime = performance.now();
                         userFirstArrow = event.key;
 
-                        if (testMode) {
-                            if (userFirstArrow === expectedArrow) {
-                                playSound("success");
-                            } else {
-                                playSound("failure");
-                            }
+                        if (userFirstArrow === expectedArrow) {
+                            playSound("success");
+                        } else {
+                            playSound("failure");
+                            numberOfWrongAnswers++;
                         }
 
                         setTimeout(function () {
                             numberOfIterations++;
                             collectDataFromStage3();
                             let nameInConfig = testMode ? "testMode" : "normalMode";
-                            if (numberOfIterations < config.numberOfRequiredAnswers[nameInConfig]) {
+                            if (shouldPerformBreak()) {
+                                performBreak();
+                            } else if (numberOfIterations < config.numberOfRequiredAnswers[nameInConfig]) {
                                 performStage1();
                             } else {
                                 advanceLevel();
                             }
                         }, 500);
                     }
+                } else if (event.key === " " && isBreak) {
+                    isBreak = false;
+                    showElem("test_break", false);
+                    beginTestCountdown();
                 }
             }
         }
@@ -392,7 +423,16 @@
         }
 
         function onBeginLevel() {
+            testMode = false;
             showCursor(false);
+            createIterations();
+            beginTestCountdown();
+        }
+
+        function onBeginPractice() {
+            testMode = true;
+            showCursor(false);
+            createIterations();
             beginTestCountdown();
         }
 
@@ -436,7 +476,7 @@
         <!-- phase2 is pitch black, so just hiding both -->
 
         <div id="test_countdown_container" style="display: none">
-            המבחן יתחיל בעוד <span id="test_countdown">10</span> שניות. <br />
+            ה<span id="test_countdown_practice_or_test">אימון</span> יתחיל בעוד <span id="test_countdown">10</span> שניות. <br />
             נא להתמקד בפלוס שלמטה
         </div>
 
@@ -464,7 +504,7 @@
             כך תישמע תשובה שגויה <audio controls id="play_failure">
                 <source src="audio/failure.mp3" />
             </audio> <br />
-            <button type="button" class="btn btn-primary" onclick="onBeginLevel()" id="test_button_begin_level">התחל שלב</button>
+            <button type="button" class="btn btn-primary" onclick="onBeginPractice()" id="test_button_begin_level">התחל שלב</button>
         </div>
         
         <div id="test_level_checkpoint" style="display: none">
@@ -472,7 +512,19 @@
             <h2>תזכורת</h2>
             <h2>יש להקיש על מקש החץ הימני אם הופיעה האות ח' או מ'.</h2>
             <h2>יש להקיש על מקש החץ השמאלי אם הופיעה האות ש' או ק'.</h2>
-            <button type="button" class="btn btn-primary" onclick="onBeginLevel()" id="test_button_begin_next_level">התחל שלב</button>
+            <div id="test_level_checkpoint_try_practice_again">
+                <br />
+                <h2>נראה שלא הלך לך טוב האימון בחור נסה שוב</h2>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="onBeginPractice()" id="test_button_begin_practice">להתחלת שלב האימון של חלק <span id="test_text_begin_next_practice" /></button>
+            <button type="button" class="btn btn-primary" onclick="onBeginLevel()" id="test_button_begin_next_level">להתחלת שלב המבחן של חלק <span id="test_text_begin_next_level" /></button>
+        </div>
+
+        <div id="test_break" style="display: none">
+            <h2>
+                אתה בהפסקה אורי תנסח משהו בחיאת
+                תלחץ רווח ואז תמשיך!!!
+            </h2>
         </div>
 
         <div id="test_done" style="display: none">
