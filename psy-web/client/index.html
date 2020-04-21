@@ -10,7 +10,9 @@
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://bootswatch.com/4/cyborg/bootstrap.min.css">
     <!-- jQuery library -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
     <link rel="stylesheet" type="text/css" href="style.css" />
 
@@ -221,6 +223,7 @@
             userData.push({
                 delayMS,
                 isCorrect: expectedArrow === selectedArrow ? "נכון" : "טעות",
+                correctLetter: randomizedIterations[numberOfIterations].correctLetter,
                 currentVocalLetter,
                 level: levelNumberToName(),
                 isTest: testMode ? "אימון" : "מבחן",
@@ -266,6 +269,9 @@
 
             paritipantGender = getSelectedGender();
             participantYear = document.getElementById("text_year").value;
+            if (participantYear === "") {
+                return;
+            }
 
             let nothing = " ";
             userData.push({
@@ -277,6 +283,7 @@
                 f: nothing,
                 g: nothing,
                 h: nothing,
+                i: nothing,
                 paritipantGender,
                 participantYear
             });
@@ -321,7 +328,7 @@
 
             showCursor(true);
             showElem("test_level_checkpoint", true);
-            showElem("test_level_checkpoint_try_practice_again", true);
+            showElem("test_level_checkpoint_try_practice_again", false);
 
             var buttonNextLevelElem = document.getElementById("test_button_begin_next_level");
             buttonNextLevelElem.disabled = false;
@@ -409,8 +416,8 @@
                         }
 
                         setTimeout(function () {
-                            numberOfIterations++;
                             collectDataFromStage3();
+                            numberOfIterations++;
                             let nameInConfig = testMode ? "testMode" : "normalMode";
                             if (shouldPerformBreak()) {
                                 performBreak();
@@ -466,11 +473,11 @@
             document.getElementById("play_success").playbackRate = 1.5;
 
             fetch('config.json')
-            .then(res => res.json())
-            .then((js) => {
-                config = js;
-            })
-            .catch(err => { throw err });
+                .then(res => res.json())
+                .then((js) => {
+                    config = js;
+                })
+                .catch(err => { throw err });
         }
 
     </script>
@@ -526,7 +533,7 @@
             <h2>יש להקיש על מקש החץ השמאלי אם הופיעה האות ש' או ק'.</h2>
             <div id="test_level_checkpoint_try_practice_again">
                 <br />
-                <h2>נראה שלא הלך לך טוב האימון בחור נסה שוב</h2>
+                <h2>אנחנו חושבים שלא יזיק עוד אימון</h2>
             </div>
             <button type="button" class="btn btn-primary" onclick="onBeginPractice()" id="test_button_begin_practice">להתחלת שלב האימון של חלק <span id="test_text_begin_next_practice" /></button>
             <button type="button" class="btn btn-primary" onclick="onBeginLevel()" id="test_button_begin_next_level">להתחלת שלב המבחן של חלק <span id="test_text_begin_next_level" /></button>
@@ -534,15 +541,48 @@
 
         <div id="test_break" style="display: none">
             <h2>
-                אתה בהפסקה אורי תנסח משהו בחיאת
-                תלחץ רווח ואז תמשיך!!!
+                הפסקה. כשאת/ה מוכן/ה להמשיך, לחצ/י על מקש רווח.
             </h2>
         </div>
 
         <div id="test_done" style="display: none">
             <h1><pre>המטלה הסתיימה.
+
 אנו מודים לך מקרב לב על השתתפותך בניסוי.
 עדי דוידוב ואורי וינשטיין
+
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+            הסבר על הניסוי בו השתתפת
+        </button>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal-dialog" role="document">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="exampleModalLabel">משתתפ/ת יקר/ה</h5>
+<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+<span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+<div class="modal-body">
+<pre style="font-size: 16px; word-wrap: break-word; white-space: pre-wrap">ראשית, אנו מודים לך מאוד על שיתוף הפעולה.
+המחקר בו השתתפת שייך לעולם הפסיכולוגיה הקוגניטיבית, ועוסק בנושא הקשב.
+קיים ויכוח בין החוקרים בתחום זה בנוגע לשאלות "מתי הקשב שלנו פועל?" – "כשאנו נחשפים למידע, מה יקבע אם אכן נקלוט אותו ונצליח לדווח עליו?" האם אנו מעבדים את כל המידע ברגע נתון ושוכחים את מה שלא רלוונטי, או שמראש מוגבלים מבחינת קיבולת ומלכתחילה מעבדים את המידע הרלוונטי בלבד?".
+שאלה נוספת וחשובה לצורך הבנת מנגנון הקשב האנושי מתייחסת לאופן הסימולטני בו אופנויות החוש מעובדות: האם המידע מכל חוש שלנו מנוהל על-ידי "מנגנון" קשב משל עצמו, או שהמידע מכל החושים שלנו מנוהל על-ידי מנגנון קשבי אחד, בו זמנית?
+במחקר הנוכחי, התעניינו בשאלה שתיתן מענה לשתי הסוגיות הללו יחדיו: כיצד מתבטאות מגבלות הקשב שלנו כאשר אנו נדרשים לעבד מידע משני חושים שונים (ראיה ושמיעה) בו בזמן?
+אנו משערים, כי הממצאים שנקבל יעידו על אופן סימולטני (בו בזמן) של עיבוד מידע בין אופנויות החוש, או במילים פשוטות, אנו מאמינים כי גם חוש הראיה וגם חוש השמיעה מנוהלים על-ידי אותו "מנגנון" אחד של קשב.
+כששני אלו יתחרו זה בזה על שימוש במשאבי המאגר המצומצם, יתגלו המגבלות הקשביות האנושיות, וכך נצליח גם לענות על השאלה הראשונה שעוסקת באופן וזמן ההתרחשות של סינון המידע במערכת הקשב.
+
+
+תודה רבה והצלחה בהמשך הדרך,
+לכל שאלה או פניה:
+עדי דוידוב Adi.davidov99@gmail.com
+אורי וינשטיין Ori.winstein20@gmail.com</pre>
+
+                    </div>
+                </div>
+            </div>
+        </div>
 
 האתר פותח ע"י <a href="https://github.com/yoavwinstein">יואב וינשטיין</a></pre></h1>
         </div>
@@ -555,11 +595,14 @@
 בכל שלב במטלה, תופיע אות / מספר אותיות על גבי צג המחשב למשך זמן קצר.
 יש להקיש על מקש החץ הימני אם הופיעה האות ח' או מ'.
 יש להקיש על מקש החץ השמאלי אם הופיעה האות ש' או ק'.
+<b>
+חשוב! יש להקפיד להקיש על המקש הנכון, וכן להגיב במהירות האפשרית.
+יש לזכור כי המטרה היא האות שמופיעה על המסך ולא האות שמושמעת באוזניות.
+</b>
 למטלה 3 חלקים.
 לפני תחילת כל חלק, תתנסה/י בשלב מקדים של אימון.
-יש להקיש על המקש הנכון מהר ככל האפשר.
 השתדל/י לבצע את המטלה ללא הסחות דעת ובסביבה שקטה.
-לחץ/י על כפתור המשך על מנת להתקדם לשלב האימון.
+לחצ/י על הכפתור להתחלת שלב האימון.
 </pre>
         מין
         <div class="custom-control custom-radio">
@@ -572,7 +615,8 @@
         </div>
         שנת לידה <input type="text" id="text_year" />
         <br />
-        <button type="button" class="btn btn-primary" onclick="onBeginTest()">להתחלת המענה</button>
+
+        <button type="button" class="btn btn-primary" onclick="onBeginTest()">להתחלת שלב האימון</button>
     </div>
 
     <audio hidden="hidden" id="play_ח">
