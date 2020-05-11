@@ -28,6 +28,8 @@
         var currentVocalLetter = null;
         var stage4BeginTime;
         var levelOrder = [1, 2, 3];
+        var currentLevelIndex = 0;
+        var currentShownIndex = 0;
         var currentLevel = 0;
         var userData = [];
         var randomizedIterations = [];
@@ -151,6 +153,8 @@
 
             var index = Math.floor(Math.random() * 6);
 
+            currentShownIndex = index;
+
             var letters = [
                 "א", "ג", "ע", "צ", "ר"
             ];
@@ -225,6 +229,10 @@
                 isCorrect: expectedArrow === selectedArrow ? "נכון" : "טעות",
                 correctLetter: randomizedIterations[numberOfIterations].correctLetter,
                 currentVocalLetter,
+                currentShownIndex: currentShownIndex + 1,
+                currentLevelIndex,
+                didVocalLetterMatch: (currentVocalLetter === correctLetter ? "כן" : "לא"),
+                numberOfIterations: testMode ? " " : numberOfIterations,
                 level: levelNumberToName(),
                 isTest: testMode ? "אימון" : "מבחן",
                 expectedArrow: translateArrowName(expectedArrow),
@@ -284,6 +292,10 @@
                 g: nothing,
                 h: nothing,
                 i: nothing,
+                j: nothing,
+                k: nothing,
+                l: nothing,
+                m: nothing,
                 paritipantGender,
                 participantYear
             });
@@ -294,6 +306,7 @@
             showElem("begintestbutton", false);
 
             currentLevel = levelOrder.pop();
+            currentLevelIndex = 1;
             createIterations();
 
             showLevelDescription();
@@ -339,7 +352,7 @@
             if (!testMode) {
                 lastStagePerformed--;
                 buttonNextLevelElem.disabled = true;
-            } else if (numberOfWrongAnswers >= 5) {
+            } else if (numberOfWrongAnswers >= 3) {
                 showElem("test_level_checkpoint_try_practice_again", true);
                 buttonNextLevelElem.disabled = true;
             }
@@ -356,6 +369,7 @@
             numberOfIterations = 0;
             if (!testMode) {
                 currentLevel = levelOrder.pop();
+                currentLevelIndex++;
             }
             uploadTestData();
             if (!currentLevel) {
