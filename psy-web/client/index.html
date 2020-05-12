@@ -223,15 +223,15 @@
             }
 
             selectedArrow = userFirstArrow ? userFirstArrow : null
-
+            let currCorrectLetter = randomizedIterations[numberOfIterations].correctLetter;
             userData.push({
                 delayMS,
                 isCorrect: expectedArrow === selectedArrow ? "נכון" : "טעות",
-                correctLetter: randomizedIterations[numberOfIterations].correctLetter,
+                correctLetter: currCorrectLetter,
                 currentVocalLetter,
                 currentShownIndex: currentShownIndex + 1,
                 currentLevelIndex,
-                didVocalLetterMatch: (currentVocalLetter === correctLetter ? "כן" : "לא"),
+                didVocalLetterMatch: (currentVocalLetter === currCorrectLetter ? "כן" : "לא"),
                 numberOfIterations: testMode ? " " : numberOfIterations,
                 level: levelNumberToName(),
                 isTest: testMode ? "אימון" : "מבחן",
