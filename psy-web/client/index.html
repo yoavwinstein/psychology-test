@@ -232,7 +232,7 @@
                 currentShownIndex: currentShownIndex + 1,
                 currentLevelIndex,
                 didVocalLetterMatch: (currentVocalLetter === currCorrectLetter ? "כן" : "לא"),
-                numberOfIterations: testMode ? " " : numberOfIterations,
+                numberOfIterations: testMode ? " " : (numberOfIterations + 1),
                 level: levelNumberToName(),
                 isTest: testMode ? "אימון" : "מבחן",
                 expectedArrow: translateArrowName(expectedArrow),
@@ -405,9 +405,25 @@
             }, 1000);
         }
 
+        function thirds(number, numberOfThirds) {
+            return number * numberOfThirds / 3;
+        }
+
+        function isThirdOf(number, anotherNumber) {
+            return thirds(number, 1) === anotherNumber;
+        }
+
+        function isTwoThirdsOf(number, anotherNumber) {
+            return thirds(number, 2) === anotherNumber;
+        }
+
         function shouldPerformBreak() {
-            let nameInConfig = testMode ? "testMode" : "normalMode";
-            return numberOfIterations === (config.numberOfRequiredAnswers[nameInConfig] / 2) && !testMode;
+            if (testMode) {
+                return false;
+            }
+            let numberOfRequiredAnswers = config.numberOfRequiredAnswers["normalMode"];
+            return isThirdOf(numberOfRequiredAnswers, numberOfIterations) ||
+                   isTwoThirdsOf(numberOfRequiredAnswers, numberOfIterations);
         }
 
         function performBreak() {
