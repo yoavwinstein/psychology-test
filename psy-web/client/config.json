@@ -1,6 +1,6 @@
 {
   "numberOfRequiredAnswers": {
-    "testMode": 10,
+    "testMode": 6,
     "normalMode": 90
   },
   "vocalDelayMS": 400
