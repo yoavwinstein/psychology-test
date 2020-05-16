@@ -216,6 +216,32 @@
             return "באג";
         }
 
+        function isInGroup(letter, group) {
+            return group.includes(letter);
+        }
+
+        function isInLeftGroup(letter) {
+            return isInGroup(letter, ["ש", "ק"]);
+        }
+
+        function isInRightGroup(letter) {
+            return isInGroup(letter, ["ח", "מ"]);
+        }
+
+        function isLettersInSameGroup(letterA, letterB) {
+            return (isInRightGroup(letterA) && isInRightGroup(letterB)) ||
+                (isInLeftGroup(letterA) && isInLeftGroup(letterB));
+        }
+
+        function getVocalLetterMatch() {
+            let currCorrectLetter = randomizedIterations[numberOfIterations].correctLetter;
+
+            if (currentVocalLetter = "ו") {
+                return "ניטרלי";
+            }
+            return isLettersInSameGroup(currentVocalLetter, currCorrectLetter) ? "כן" : "לא";
+        }
+
         function collectDataFromStage3() {
             var delayMS = null;
             if (userFirstArrowTime) {
@@ -231,7 +257,7 @@
                 currentVocalLetter,
                 currentShownIndex: currentShownIndex + 1,
                 currentLevelIndex,
-                didVocalLetterMatch: (currentVocalLetter === currCorrectLetter ? "כן" : "לא"),
+                didVocalLetterMatch: getVocalLetterMatch(),
                 numberOfIterations: testMode ? " " : (numberOfIterations + 1),
                 level: levelNumberToName(),
                 isTest: testMode ? "אימון" : "מבחן",
