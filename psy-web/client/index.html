@@ -236,7 +236,7 @@
         function getVocalLetterMatch() {
             let currCorrectLetter = randomizedIterations[numberOfIterations].correctLetter;
 
-            if (currentVocalLetter = "ו") {
+            if (currentVocalLetter === "ו") {
                 return "ניטרלי";
             }
             return isLettersInSameGroup(currentVocalLetter, currCorrectLetter) ? "כן" : "לא";
