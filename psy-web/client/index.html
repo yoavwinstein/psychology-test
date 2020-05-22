@@ -56,9 +56,9 @@
         }
 
         // The requirements for non-training levels is as follows:
-        // - 20 levels where the heard letter matches the written one
-        // - 20 levels where the heard letter does not match the written one
-        // - 20 levels where the neutral letter is heard
+        // - 1/3 levels where the heard letter matches the written one
+        // - 1/3 levels where the heard letter does not match the written one
+        // - 1/3 levels where the neutral letter is heard
         // The iterations are pre-determined in order to create such situations like that
         function createIterations() {
 
@@ -69,19 +69,36 @@
             const correctLettersList = getCorrectLetters();
             const vocalLettersList = getVocalLetters();
 
+            let leftGroup = getLeftGroup();
+            let rightGroup = getLeftGroup();
+            let letterGroups = [leftGroup, rightGroup];
+
             let correctLetters = [];
             let vocalLetters = [];
 
             for (let i = 0; i < numberOfRequiredAnswers; ++i) {
-                let correctLetter = correctLettersList[i % correctLettersList.length];
-                correctLetters.push(correctLetter);
 
-                let vocalLetter = vocalLettersList[i % vocalLettersList.length];
+                let correctLetter = 0;
+                let vocalLetter = 0;
+                switch (i % 3) {
+                    case 0:
+                        let groupIndex = randomIndex(letterGroups);
+                        correctLetter = randomFromList(letterGroups[groupIndex]);
+                        vocalLetter = randomFromList(letterGroups[groupIndex]);
+                        break;
+                    case 1:
+                        let groupIndex = randomIndex(letterGroups);
+                        correctLetter = randomFromList(letterGroups[groupIndex]);
+                        vocalLetter = randomFromList(letterGroups[(groupIndex + 1) % 2]);
+                        break;
+                    case 2:
+                        correctLetter = correctLettersList[i % correctLettersList.length];
+                        vocalLetter = "ו";
+                        break;
+                }
+                correctLetters.push(correctLetter);
                 vocalLetters.push(vocalLetter);
             }
-
-            shuffle(correctLetters);
-            shuffle(vocalLetters);
 
             for (let i = 0; i < numberOfRequiredAnswers; ++i) {
                 randomizedIterations.push({
@@ -120,8 +137,12 @@
             return str.substr(0, index) + replacement + str.substr(index + replacement.length);
         }
 
+        function randomIndex(items) {
+            return Math.floor(Math.random() * items.length);
+        }
+
         function randomFromList(items) {
-            return items[Math.floor(Math.random() * items.length)];
+            return items[randomIndex(items)];
         }
 
         function getCorrectLetters() {
@@ -216,16 +237,24 @@
             return "באג";
         }
 
+        function getLeftGroup() {
+            return ["ש", "ק"];
+        }
+
+        function getRightGroup() {
+            return ["ח", "מ"];
+        }
+
         function isInGroup(letter, group) {
             return group.includes(letter);
         }
 
         function isInLeftGroup(letter) {
-            return isInGroup(letter, ["ש", "ק"]);
+            return isInGroup(letter, getLeftGroup());
         }
 
         function isInRightGroup(letter) {
-            return isInGroup(letter, ["ח", "מ"]);
+            return isInGroup(letter, getRightGroup());
         }
 
         function isLettersInSameGroup(letterA, letterB) {
