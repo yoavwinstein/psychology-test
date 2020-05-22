@@ -80,14 +80,15 @@
 
                 let correctLetter = 0;
                 let vocalLetter = 0;
+                let groupIndex = 0;
                 switch (i % 3) {
                     case 0:
-                        let groupIndex = randomIndex(letterGroups);
+                        groupIndex = randomIndex(letterGroups);
                         correctLetter = randomFromList(letterGroups[groupIndex]);
                         vocalLetter = randomFromList(letterGroups[groupIndex]);
                         break;
                     case 1:
-                        let groupIndex = randomIndex(letterGroups);
+                        groupIndex = randomIndex(letterGroups);
                         correctLetter = randomFromList(letterGroups[groupIndex]);
                         vocalLetter = randomFromList(letterGroups[(groupIndex + 1) % 2]);
                         break;
